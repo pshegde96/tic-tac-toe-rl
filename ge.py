@@ -106,6 +106,8 @@ class RLPlayer(Player):
 			board_posns.append(list(config))
 			value_fn.append(0.5)
 
+
+
 		#Set all the winning moves prob to 1 and losing moves prob to 0
 		count = 0
 		for board_posn in board_posns:
@@ -120,7 +122,7 @@ class RLPlayer(Player):
 
 		self.board_posns = board_posns
 		self.value_fn = value_fn
-
+                self.newboardposn = self.board_posns.index([0]*9) #Set the board posn as the initial posn of the board, used later in TD update
 
 	def PlayerMove(self,grid,mode = 'train'):	
 		
@@ -131,12 +133,15 @@ class RLPlayer(Player):
 		if explore_or_exploit == 0: #explore
 			move = np.random.choice(empty_pos.shape[0])
 			#update probabilities
-			board_new = board.copy()
-			board_new[move] = self.playerid
-			oldposn = self.board_posns.index(list(board))
-			newposn = self.board_posns.index(list(board_new))
+			#board_new = board.copy()
+			#board_new[move] = self.playerid
+			#oldposn = self.board_posns.index(list(board))
+			#newposn = self.board_posns.index(list(board_new))
+                        #Get the board positions to perform TD update
+                        self.oldboardposn = self.newboardposn
+                        self.newboardposn = self.board_posns.index(list(board))
 			# TD update
-			self.value_fn[oldposn] = self.value_fn[oldposn]*(1-self.alpha) + self.value_fn[newposn]*self.alpha
+			self.value_fn[oldposn] = self.value_fn[self.oldboardposn]*(1-self.alpha) + self.value_fn[self.newboardposn]*self.alpha
 
 		else: #exploit
 			move_probs = np.zeros(9) 

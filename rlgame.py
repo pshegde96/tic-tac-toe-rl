@@ -3,7 +3,7 @@ import ge
 import numpy as np
 
 player1 = ge.HumanPlayer(1)
-player2 = ge.HumanPlayer(2)
+player2 = ge.RLPlayer(2)
 number_of_games = 1
 for game_no in range(number_of_games):
 	print game_no
