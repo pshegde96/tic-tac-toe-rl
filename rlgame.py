@@ -1,12 +1,21 @@
 import os
 import ge
 import numpy as np
+import pickle
 
-player1 = ge.HumanPlayer(1)
+player1 = ge.RLPlayer(1)
 player2 = ge.RLPlayer(2)
-number_of_games = 1
-gameplay = ge.GamePlay(player1,player2)
+number_of_games = 50000
+gameplay = ge.GamePlay(player1,player2,no_of_games=number_of_games)
 gameplay.play()
+with open('rl_player1.pkl','w') as f:
+    pickle.dump([player1.board_posns,player1.value_fn],f)
+with open('rl_player2.pkl','w') as f:
+    pickle.dump([player2.board_posns,player2.value_fn],f)
+
+playerhuman = ge.HumanPlayer(2)
+gameplay2 = ge.GamePlay(player1,playerhuman)
+gameplay2.play()
 '''
 for game_no in range(number_of_games):
 	print game_no

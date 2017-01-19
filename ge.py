@@ -63,6 +63,7 @@ class HumanPlayer(Player):
 	#Accept a move from the player and make the move
 	def PlayerMove(self,grid):
 		correct_move = 0;
+                grid.display()
 		while correct_move == 0:
 			string = "Move by Player " + str(self.playerid) + " : ";
 			print string;
@@ -142,7 +143,7 @@ class RLPlayer(Player):
                         self.oldboardposn = self.newboardposn
                         self.newboardposn = self.board_posns.index(list(board))
 			# TD update
-			self.value_fn[oldposn] = self.value_fn[self.oldboardposn]*(1-self.alpha) + self.value_fn[self.newboardposn]*self.alpha
+			self.value_fn[self.oldboardposn] = self.value_fn[self.oldboardposn]*(1-self.alpha) + self.value_fn[self.newboardposn]*self.alpha
 
 		else: #exploit
 			move_probs = np.zeros(9) 
@@ -154,16 +155,21 @@ class RLPlayer(Player):
 				move_probs[move_possible] = self.value_fn[possibleposn]
 			#Choose move greedily
 			move = np.argmax(np.array(move_probs))
-			board_new = board.copy()
-			board_new[move] = self.playerid
-			oldposn = self.board_posns.index(list(board))
-			newposn = self.board_posns.index(list(board_new))
 			# TD update
-			self.value_fn[oldposn] = self.value_fn[oldposn]*(1-self.alpha) + self.value_fn[newposn]*self.alpha
+                        self.oldboardposn = self.newboardposn
+                        self.newboardposn = self.board_posns.index(list(board))
+			self.value_fn[self.oldboardposn] = self.value_fn[self.oldboardposn]*(1-self.alpha) + self.value_fn[self.newboardposn]*self.alpha
 
 		row = int(move)/3
 		col = move%3
 		grid.squares[row,col] = self.playerid
+
+        def TDupdate(self,grid):
+                    board = grid.squares.reshape(9)
+                    self.oldboardposn = self.newboardposn
+                    self.newboardposn = self.board_posns.index(list(board))
+                    # TD update
+                    self.value_fn[self.oldboardposn] = self.value_fn[self.oldboardposn]*(1-self.alpha) + self.value_fn[self.newboardposn]*self.alpha
 		
 class GamePlay:
     def __init__(self,player1,player2,no_of_games=1,display=False):
@@ -173,7 +179,10 @@ class GamePlay:
         self.display = display
 
     def play(self):
-        for _ in range(self.no_of_games):
+        p1_count = 0
+        p2_count = 0
+        for game_count in range(self.no_of_games+1):
+            print game_count
             game_end = 0
             count = 0
             grid = Grid()
@@ -182,24 +191,41 @@ class GamePlay:
                     self.player1.PlayerMove(grid)
                     game_end = self.player1.CheckWin(grid)
                     if game_end == 1:
-                        #if self.player1.playertype == 'rl':
-                        #    player1.TDupdate()
+                        p1_count += 1
+                        #These updates are to update the value functions at the end of the game
+                        if self.player1.playertype == 'rl':
+                            self.player1.TDupdate(grid)
+                        if self.player2.playertype == 'rl':
+                            self.player2.TDupdate(grid)
                         break
+                      
                     game_end = self.player1.CheckDraw(grid)
                     if game_end == 1:
-                       # if self.player1.playertype == 'rl':
-                       #     player1.TDupdate()
+                        #These updates are to update the value functions at the end of the game
+                        if self.player1.playertype == 'rl':
+                            self.player1.TDupdate(grid)
+                        if self.player2.playertype == 'rl':
+                            self.player2.TDupdate(grid)
                         break
             
                 else:
                     self.player2.PlayerMove(grid)
                     game_end = self.player2.CheckWin(grid)
                     if game_end == 1:
-                        #if self.player1.playertype == 'rl':
-                        #    player1.TDupdate()
+                        p2_count += 1
+                        #These updates are to update the value functions at the end of the game
+                        if self.player1.playertype == 'rl':
+                            self.player1.TDupdate(grid)
+                        if self.player2.playertype == 'rl':
+                            self.player2.TDupdate(grid)
                         break
                     game_end = self.player2.CheckDraw(grid)
                     if game_end == 1:
-                        #if self.player1.playertype == 'rl':
-                        #    player1.TDupdate()
+                        #These updates are to update the value functions at the end of the game
+                        if self.player1.playertype == 'rl':
+                            self.player1.TDupdate(grid)
+                        if self.player2.playertype == 'rl':
+                            self.player2.TDupdate(grid)
                         break
+                count += 1
+        print p1_count,p2_count
