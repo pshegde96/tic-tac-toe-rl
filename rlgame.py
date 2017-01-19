@@ -2,8 +2,8 @@ import os
 import ge
 import numpy as np
 
-player1 = ge.RLPlayer(1)
-player2 = ge.RandomPlayer(2)
+player1 = ge.HumanPlayer(1)
+player2 = ge.HumanPlayer(2)
 number_of_games = 1
 for game_no in range(number_of_games):
 	print game_no
@@ -14,6 +14,8 @@ for game_no in range(number_of_games):
 		if count%2 ==0:
 			player1.PlayerMove(grid);
 			game_end = player1.CheckWin(grid)	
+			if game_end == 1:
+				break
 			game_end = player1.CheckDraw(grid)
 			if game_end == 1:
 				break
@@ -21,6 +23,8 @@ for game_no in range(number_of_games):
 		else:
 			player2.PlayerMove(grid)
 			game_end = player2.CheckWin(grid)
+			if game_end == 1:
+				break
 			game_end = player1.CheckDraw(grid)
 			if game_end == 1:
 				break
