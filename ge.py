@@ -23,7 +23,7 @@ class Player:
 	#Used to initialise a player with his ID
 	def __init__(self,pid):
 		self.playerid = pid;
-
+                self.playertype = 'notrl'
 
 	#Check if a player has won the game
 	def CheckWin(self,grid):
@@ -93,6 +93,7 @@ class RLPlayer(Player):
 		self.playerid = pid;
 		self.eps = eps
 		self.alpha = alpha
+                self.playertype = 'rl'
 		if pid == 1:
 			self.opponentid = 2
 		else:
@@ -164,4 +165,41 @@ class RLPlayer(Player):
 		col = move%3
 		grid.squares[row,col] = self.playerid
 		
-		
+class GamePlay:
+    def __init__(self,player1,player2,no_of_games=1,display=False):
+        self.player1 = player1
+        self.player2 = player2
+        self.no_of_games = no_of_games
+        self.display = display
+
+    def play(self):
+        for _ in range(self.no_of_games):
+            game_end = 0
+            count = 0
+            grid = Grid()
+            while True:
+                if count%2 == 0:
+                    self.player1.PlayerMove(grid)
+                    game_end = self.player1.CheckWin(grid)
+                    if game_end == 1:
+                        #if self.player1.playertype == 'rl':
+                        #    player1.TDupdate()
+                        break
+                    game_end = self.player1.CheckDraw(grid)
+                    if game_end == 1:
+                       # if self.player1.playertype == 'rl':
+                       #     player1.TDupdate()
+                        break
+            
+                else:
+                    self.player2.PlayerMove(grid)
+                    game_end = self.player2.CheckWin(grid)
+                    if game_end == 1:
+                        #if self.player1.playertype == 'rl':
+                        #    player1.TDupdate()
+                        break
+                    game_end = self.player2.CheckDraw(grid)
+                    if game_end == 1:
+                        #if self.player1.playertype == 'rl':
+                        #    player1.TDupdate()
+                        break

@@ -5,6 +5,9 @@ import numpy as np
 player1 = ge.HumanPlayer(1)
 player2 = ge.RLPlayer(2)
 number_of_games = 1
+gameplay = ge.GamePlay(player1,player2)
+gameplay.play()
+'''
 for game_no in range(number_of_games):
 	print game_no
 	grid = ge.Grid()
@@ -29,4 +32,4 @@ for game_no in range(number_of_games):
 			if game_end == 1:
 				break
 		count += 1
-
+'''
