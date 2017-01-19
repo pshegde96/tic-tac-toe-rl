@@ -99,7 +99,7 @@ class RLPlayer(Player):
 			self.opponentid = 2
 		else:
 			self.opponentid = 1
-
+                '''
 		#Maintain a list of all possible board configurations
 		possible_configs_itertools = itertools.product([0,1,2],repeat=9)
 		board_posns = list()
@@ -121,29 +121,51 @@ class RLPlayer(Player):
 				if set(win_move).issubset(set(opp_posn)):
 					value_fn[count] = 0.0
 			count += 1		
+                '''
+                self.value_fn = {}
+		#self.board_posns = board_posns
+		#self.value_fn = value_fn
+                self.newboardposn = np.zeros(9) #Set the board posn as the initial posn of the board, used later in TD update
+                self.value_fn[tuple(np.zeros(9))] = 0.5
 
-		self.board_posns = board_posns
-		self.value_fn = value_fn
-                self.newboardposn = self.board_posns.index([0]*9) #Set the board posn as the initial posn of the board, used later in TD update
+
+        def AddBoardPosn(self,board):
+                self.value_fn[tuple(board)] = 0.5
+                #Check if it is winning posn
+                marked_win = set(np.where(board==self.playerid)[0])
+                
+                #Check if it is losing posn
+                marked_lose = set(np.where(board==self.opponentid)[0])
+                for i in range(winning.shape[0]):
+                    if set(winning[i]).issubset(marked_win):
+                        self.value_fn[tuple(board)] = 1.0
+                        break
+                    elif set(winning[i]).issubset(marked_lose):
+                        self.value_fn[tuple(board)] = 0.0
+                        break
+
+                    #Check if it is draw posn
+                    empty = np.where(board==0)[0]
+                    if not(list(empty)):
+                       self.value_fn[tuple(board)] = 0.0
+                       break
 
 	def PlayerMove(self,grid,mode = 'train'):	
-		
+	        grid.display()	
 		board = grid.squares.reshape(9)
 		empty_pos = np.where(board==0)[0]
 		explore_or_exploit = np.random.choice(2,p = [self.eps,1-self.eps])
 		
 		if explore_or_exploit == 0: #explore
 			move = np.random.choice(empty_pos.shape[0])
-			#update probabilities
-			#board_new = board.copy()
-			#board_new[move] = self.playerid
-			#oldposn = self.board_posns.index(list(board))
-			#newposn = self.board_posns.index(list(board_new))
+                        board[move] = self.playerid
                         #Get the board positions to perform TD update
                         self.oldboardposn = self.newboardposn
-                        self.newboardposn = self.board_posns.index(list(board))
+                        if not(tuple(board) in self.value_fn):
+                            self.AddBoardPosn(board)
+                        self.newboardposn = board
 			# TD update
-			self.value_fn[self.oldboardposn] = self.value_fn[self.oldboardposn]*(1-self.alpha) + self.value_fn[self.newboardposn]*self.alpha
+			self.value_fn[tuple(self.oldboardposn)] = self.value_fn[tuple(self.oldboardposn)]*(1-self.alpha) + self.value_fn[tuple(self.newboardposn)]*self.alpha
 
 		else: #exploit
 			move_probs = np.zeros(9) 
@@ -151,14 +173,19 @@ class RLPlayer(Player):
 			for move_possible in empty_pos:
 				board_possible = board.copy()
 				board_possible[move_possible] = self.playerid
-				possibleposn = self.board_posns.index(list(board_possible))
-				move_probs[move_possible] = self.value_fn[possibleposn]
+                                if not(tuple(board_possible) in self.value_fn):
+                                    self.AddBoardPosn(board_possible)
+                                    #print self.value_fn
+                                move_probs[move_possible] = self.value_fn[tuple(board_possible)]
 			#Choose move greedily
 			move = np.argmax(np.array(move_probs))
+                        board[move] = self.playerid
+                        if not(tuple(board) in self.value_fn):
+                            self.AddBoardPosn(board)
 			# TD update
                         self.oldboardposn = self.newboardposn
-                        self.newboardposn = self.board_posns.index(list(board))
-			self.value_fn[self.oldboardposn] = self.value_fn[self.oldboardposn]*(1-self.alpha) + self.value_fn[self.newboardposn]*self.alpha
+                        self.newboardposn = board
+			self.value_fn[tuple(self.oldboardposn)] = self.value_fn[tuple(self.oldboardposn)]*(1-self.alpha) + self.value_fn[tuple(self.newboardposn)]*self.alpha
 
 		row = int(move)/3
 		col = move%3
@@ -166,10 +193,12 @@ class RLPlayer(Player):
 
         def TDupdate(self,grid):
                     board = grid.squares.reshape(9)
+                    if not(tuple(board) in self.value_fn):
+                        self.AddBoardPosn(board)
                     self.oldboardposn = self.newboardposn
-                    self.newboardposn = self.board_posns.index(list(board))
+                    self.newboardposn = board
                     # TD update
-                    self.value_fn[self.oldboardposn] = self.value_fn[self.oldboardposn]*(1-self.alpha) + self.value_fn[self.newboardposn]*self.alpha
+                    self.value_fn[tuple(self.oldboardposn)] = self.value_fn[tuple(self.oldboardposn)]*(1-self.alpha) + self.value_fn[tuple(self.newboardposn)]*self.alpha
 		
 class GamePlay:
     def __init__(self,player1,player2,no_of_games=1,display=False):
