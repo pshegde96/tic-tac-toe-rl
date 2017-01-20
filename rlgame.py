@@ -5,14 +5,15 @@ import pickle
 
 player1 = ge.RLPlayer(1)
 player2 = ge.RLPlayer(2)
-number_of_games =10000
+number_of_games =50000
 gameplay = ge.GamePlay(player1,player2,no_of_games=number_of_games)
 gameplay.play()
-with open('rl_player1.pkl','w') as f:
-    pickle.dump([player1.value_fn],f)
-with open('rl_player2.pkl','w') as f:
-    pickle.dump([player2.value_fn],f)
+with open('agents/rl_player1_'+str(number_of_games)+'.pkl','w') as f:
+    pickle.dump(player1.value_fn,f)
+with open('agents/rl_player2_'+str(number_of_games)+'.pkl','w') as f:
+    pickle.dump(player2.value_fn,f)
 
+player1.mode = 'test'
 playerhuman = ge.HumanPlayer(2)
 gameplay2 = ge.GamePlay(player1,playerhuman)
 gameplay2.play()
