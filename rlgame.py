@@ -5,7 +5,7 @@ import pickle
 
 player1 = ge.RLPlayer(1)
 player2 = ge.RLPlayer(2)
-number_of_games = 5000
+number_of_games =10000
 gameplay = ge.GamePlay(player1,player2,no_of_games=number_of_games)
 gameplay.play()
 with open('rl_player1.pkl','w') as f:
