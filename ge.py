@@ -90,41 +90,21 @@ class RandomPlayer(Player):
 
 class RLPlayer(Player):
 
-	def __init__(self,pid,eps=0.1,alpha=0.1):
+	def __init__(self,pid,eps=0.1,alpha=0.9,mode='train'):
 		self.playerid = pid;
 		self.eps = eps
 		self.alpha = alpha
                 self.playertype = 'rl'
+                self.mode = mode
+                self.no_of_moves = 0
+                self.move_change_alpha = 1000  #Move at which to decrease alpha
 		if pid == 1:
 			self.opponentid = 2
 		else:
 			self.opponentid = 1
-                '''
-		#Maintain a list of all possible board configurations
-		possible_configs_itertools = itertools.product([0,1,2],repeat=9)
-		board_posns = list()
-		value_fn = list()
-		for config in possible_configs_itertools:
-			board_posns.append(list(config))
-			value_fn.append(0.5)
 
-
-
-		#Set all the winning moves prob to 1 and losing moves prob to 0
-		count = 0
-		for board_posn in board_posns:
-			player_posn = np.where(np.array(board_posn) == self.playerid)[0]
-			opp_posn = np.where(np.array(board_posn) == self.opponentid)[0]
-			for win_move in winning:
-				if set(win_move).issubset(set(player_posn)):
-					value_fn[count] = 1.0
-				if set(win_move).issubset(set(opp_posn)):
-					value_fn[count] = 0.0
-			count += 1		
-                '''
+                #Value function corresponding to states
                 self.value_fn = {}
-		#self.board_posns = board_posns
-		#self.value_fn = value_fn
                 self.newboardposn = np.zeros(9) #Set the board posn as the initial posn of the board, used later in TD update
                 self.value_fn[tuple(np.zeros(9))] = 0.5
 
@@ -150,13 +130,13 @@ class RLPlayer(Player):
                        self.value_fn[tuple(board)] = 0.0
                        break
 
-	def PlayerMove(self,grid,mode = 'train'):	
+	def PlayerMove(self,grid):	
 
 		board = grid.squares.reshape(9)
 		empty_pos = np.where(board==0)[0] #Find empty positions to make a move
 		explore_or_exploit = np.random.choice(2,p = [self.eps,1-self.eps]) #Choose to exploit or explore
-		
-		if explore_or_exploit == 0: #explore
+
+		if (explore_or_exploit == 0) and (self.mode == 'train'): #explore
 			move = np.random.choice(empty_pos.shape[0])
                         board[move] = self.playerid
                         #Get the board positions to perform TD update
@@ -186,6 +166,14 @@ class RLPlayer(Player):
                         self.oldboardposn = self.newboardposn
                         self.newboardposn = board
 			self.value_fn[tuple(self.oldboardposn)] = self.value_fn[tuple(self.oldboardposn)]*(1-self.alpha) + self.value_fn[tuple(self.newboardposn)]*self.alpha
+
+                #update of alpha
+                if self.mode == 'train':
+                        self.no_of_moves += 1
+                        if self.no_of_moves > self.move_change_alpha:
+                            self.alpha = 0.9*self.alpha
+                            self.move_change_alpha += 1000
+
 		row = int(move)/3
 		col = move%3
 		grid.squares[row,col] = self.playerid
