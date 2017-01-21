@@ -137,8 +137,6 @@ class RLPlayer(Player):
 		explore_or_exploit = np.random.choice(2,p = [self.eps,1-self.eps]) #Choose to exploit or explore
 
 		if (explore_or_exploit == 0) and (self.mode == 'train'): #explore
-			# TD update
-			#self.value_fn[tuple(self.oldboardposn)] += self.alpha*(self.value_fn[tuple(self.newboardposn)] - self.value_fn[tuple(self.oldboardposn)])
 			move = np.random.choice(empty_pos.shape[0])
                         board[move] = self.playerid
                         #Get the board positions to perform TD update
@@ -146,6 +144,8 @@ class RLPlayer(Player):
                         if not(tuple(board) in self.value_fn): #If the board position is not in the list of available positions, add it
                             self.AddBoardPosn(board)
                         self.newboardposn = board.copy()
+			# TD update
+			self.value_fn[tuple(self.oldboardposn)] += self.alpha*(self.value_fn[tuple(self.newboardposn)] - self.value_fn[tuple(self.oldboardposn)])
 
 		else: #exploit
 			move_probs = -1*np.ones(9) #set the probabilities to make a move to -1 as default. Later update for available moves
