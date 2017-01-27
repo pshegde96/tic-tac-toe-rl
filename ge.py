@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 import os,itertools
 
 winning = np.array([[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]);
@@ -185,6 +186,18 @@ class RLPlayer(Player):
                     self.newboardposn = board.copy()
                     # TD update
                     self.value_fn[tuple(self.oldboardposn)] += self.alpha*(self.value_fn[tuple(self.newboardposn)] - self.value_fn[tuple(self.oldboardposn)])
+
+
+        '''Load a trained agent '''
+        def load(self,filename):
+            with open(filename) as f:
+                val_fn = pickle.load(f)
+            self.value_fn = val_fn
+
+        '''Save a trained agent '''
+        def save(self,filename):
+            with open(filename,'w') as f:
+                pickle.dump(self.value_fn,f)
 		
 class GamePlay:
     def __init__(self,player1,player2,no_of_games=1,display=False):
