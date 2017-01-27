@@ -26,30 +26,21 @@ class Player:
 		self.playerid = pid;
                 self.playertype = 'notrl'
 
-	#Check if a player has won the game
-	def CheckWin(self,grid):
-		#Reshape the grid to a 1D array for easier computation
+
+
+        def CheckWin(self,grid): 
+
 		sq = grid.squares.reshape(1,9)[0];
-		#Check which squares have been marked by the player
-		marked = np.where(sq==self.playerid)[0];
-		#flag = 1 will mean the player has won
-		flag = 0;
-		#Check for the presence of winning squares
-		for lci in range(0,8):
-			count = 0;
-			for lcj in range(0,3):
-				if winning[lci,lcj] in marked:
-					count += 1;
-			if count >= 3 :
-				flag = 1;
-				break;
-		if flag == 1:
+                marked = set(np.where(sq==self.playerid)[0])
+                
+                for i in range(winning.shape[0]):
+                    if set(winning[i]).issubset(marked):
 			string = "Player " + str(self.playerid) + " wins!!!";
 			print string;
-			return 1;
-		else:
-			return 0;
-	
+                        return 1
+
+                return 0
+
 	def CheckDraw(self,grid):
 		sq = grid.squares.reshape(9)
 		empty = np.where(sq==0)[0]
