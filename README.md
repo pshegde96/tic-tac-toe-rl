@@ -2,8 +2,11 @@ This is an implementation of the TD algorithm presented in Chapter 1 of [Sutton 
 
 ###Files:
 ge.py : Contains the descriptions of all the players and the game
+
 game_with_trained_agent.py : To play game against a trained rl agent
+
 game_trainRLAgent.py : To train 2 RL agents by playing against each other
+
 agents/: contains files for trained agents
 
 ###Description:
