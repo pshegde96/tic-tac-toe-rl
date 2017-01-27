@@ -17,7 +17,8 @@ There are 3 kinds of players:
 * Random Player: Picks one of the legal moves randomly
 
 ###Usage:
-Run ~python game_with_trained_agent.py ~ to play with a trained RL agent
-Run ~python game_trainRLAgent.py  ~ to train RL agents by playing against each other and store them in agents/ directory
+Run <code>python game_with_trained_agent.py </code> to play with a trained RL agent
+
+Run <code>python game_trainRLAgent.py  </code> to train RL agents by playing against each other and store them in agents/ directory
 
 Checkout the above mentioned files to checkout how to use the classes described in ge.py and use them in different ways. 
